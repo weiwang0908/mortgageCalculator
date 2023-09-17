@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>房贷计算器</title>
+    <meta charset="UTF-8">
+    <style>
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    label, input {
+      display: block;
+      width: 100%;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #result1, #result2 {
+      margin-top: 20px;
+      padding: 10px;
+      font-weight: bold;
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .hidden {
+      display: none;
+    }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>房贷计算器</h2>
+    <div class="form-group">
+        <label for="loanAmount">贷款金额（万元）</label>
+        <input type="number" id="loanAmount" placeholder="100" value="100">
+    </div>
+    <div class="form-group">
+        <label for="interestRate">年利率（%）</label>
+        <input type="number" id="interestRate" placeholder="3.1" value="3.1">
+    </div>
+    <div class="form-group">
+        <label for="loanTerm">贷款期限（年）</label>
+        <input type="number" id="loanTerm" placeholder="30" value="30">
+    </div>
+    <button onclick="calculateLoan1(); calculateLoan2();">计算</button>
+    <div class="hidden" id="result1"></div>
+    <div class="hidden" id="result2"></div>
+</div>
+
+<script>
+    function calculateLoan1() {
+      document.getElementById("result1").classList.add("hidden");
+      // 获取输入值
+      var loanAmount = parseFloat(document.getElementById("loanAmount").value) * 10000;
+      var interestRate = parseFloat(document.getElementById("interestRate").value);
+      var loanTerm = parseFloat(document.getElementById("loanTerm").value);
+
+      // 计算每月还款金额
+      var monthlyInterestRate = interestRate / 100 / 12;
+      var monthlyPayment = (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -(loanTerm*12)));
+      document.getElementById("result1").classList.remove("hidden");
+
+      // 显示结果
+      document.getElementById("result1").innerHTML = "每月还款金额(等额本息)：" + monthlyPayment.toFixed(2) + "元";
+    }
+
+    function calculateLoan2() {
+      // 获取输入值
+      var loanAmount = parseFloat(document.getElementById("loanAmount").value) * 10000;
+      var interestRate = parseFloat(document.getElementById("interestRate").value);
+      var loanTerm = parseFloat(document.getElementById("loanTerm").value);
+
+      // 计算每月还款金额和每月应还本金
+      var monthlyInterestRate = interestRate / 100 / 12;
+      var totalMonths = loanTerm * 12;
+      var monthlyPrincipal = loanAmount / totalMonths;
+
+      var monthlyPayments = [];
+      var remainingPrincipal = loanAmount;
+
+      for (var i = 0; i < totalMonths; i++) {
+        var monthlyInterest = remainingPrincipal * monthlyInterestRate;
+        var monthlyPayment = monthlyInterest + monthlyPrincipal;
+
+        monthlyPayments.push(monthlyPayment.toFixed(2));
+        remainingPrincipal -= monthlyPrincipal;
+      }
+      document.getElementById("result2").classList.remove("hidden");
+
+      // 显示结果
+      document.getElementById("result2").innerHTML = "首月还款金额(等额本金)：" + monthlyPayments[0] + " 元";
+    }
+
+</script>
+</body>
+</html>
