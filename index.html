@@ -1,114 +1,474 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>房贷计算器</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Calculator</title>
     <style>
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    h2 {
-      text-align: center;
-    }
-    .form-group {
-      margin-bottom: 10px;
-    }
-    label, input {
-      display: block;
-      width: 100%;
-    }
-    button {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #result1, #result2 {
-      margin-top: 20px;
-      padding: 10px;
-      font-weight: bold;
-      background-color: #f2f2f2;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .hidden {
-      display: none;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .calculator-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            align-items: flex-start;
+        }
 
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group:first-child {
+            margin-top: 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .percentage-input {
+            display: flex;
+            align-items: center;
+        }
+
+        .percentage-input input {
+            flex: 1;
+        }
+
+        .percentage-input span {
+            margin-left: 8px;
+        }
+
+        .results-wrapper {
+            margin-top: -10px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #0066ff;
+            font-weight: 500;
+        }
+
+        .results-section {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            padding: 24px;
+        }
+        
+        .results-section > :first-child {
+            margin-top: 0;
+        }
+        
+        .results-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .payment-circle {
+            width: 280px;
+            height: 280px;
+            margin: 0;
+            position: relative;
+        }
+
+        .monthly-amount {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .monthly-amount .amount {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .monthly-amount .label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breakdown-items {
+            margin: 0;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-label {
+            display: flex;
+            align-items: center;
+        }
+
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .amount-input {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 8px;
+            width: 120px;
+        }
+
+        .amount-input span {
+            margin-right: 4px;
+        }
+
+        .amount-input input {
+            border: none;
+            width: 100%;
+            text-align: right;
+        }
+
+        .advertiser-disclosure {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            color: #0066ff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .results-section h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .results-section p {
+            color: #666;
+            margin: 8px 0 0 0;
+        }
+
+        .update-button {
+            background-color: #0066ff;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .update-button:hover {
+            background-color: #0052cc;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<div class="container">
-    <h2>房贷计算器</h2>
-    <div class="form-group">
-        <label for="loanAmount">贷款金额（万元）</label>
-        <input type="number" id="loanAmount" placeholder="100" value="100">
-    </div>
-    <div class="form-group">
-        <label for="interestRate">年利率（%）</label>
-        <input type="number" id="interestRate" placeholder="3.1" value="3.1">
-    </div>
-    <div class="form-group">
-        <label for="loanTerm">贷款期限（年）</label>
-        <input type="number" id="loanTerm" placeholder="30" value="30">
-    </div>
-    <button onclick="calculateLoan1(); calculateLoan2();">计算</button>
-    <div class="hidden" id="result1"></div>
-    <div class="hidden" id="result2"></div>
-</div>
+    <h1>Mortgage Calculator</h1>
+    
+    <div class="calculator-container">
+        <div class="inputs-section">
+            <div class="input-group">
+                <label>Home price</label>
+                <input type="text" id="homePrice" class="input-field" value="$425,000">
+            </div>
 
-<script>
-    function calculateLoan1() {
-      document.getElementById("result1").classList.add("hidden");
-      // 获取输入值
-      var loanAmount = parseFloat(document.getElementById("loanAmount").value) * 10000;
-      var interestRate = parseFloat(document.getElementById("interestRate").value);
-      var loanTerm = parseFloat(document.getElementById("loanTerm").value);
+            <div class="input-group">
+                <label>Down payment</label>
+                <div class="percentage-input">
+                    <input type="text" id="downPaymentAmount" class="input-field" value="$85,000">
+                    <input type="text" id="downPaymentPercent" class="input-field" value="20" style="width: 60px">
+                    <span>%</span>
+                </div>
+            </div>
 
-      // 计算每月还款金额
-      var monthlyInterestRate = interestRate / 100 / 12;
-      var monthlyPayment = (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -(loanTerm*12)));
-      document.getElementById("result1").classList.remove("hidden");
+            <div class="input-group">
+                <label>Loan term</label>
+                <select id="loanTerm" class="input-field">
+                    <option value="30">30 years</option>
+                    <option value="20">20 years</option>
+                    <option value="15">15 years</option>
+                    <option value="10">10 years</option>
+                </select>
+            </div>
 
-      // 显示结果
-      document.getElementById("result1").innerHTML = "每月还款金额(等额本息)：" + monthlyPayment.toFixed(2) + "元";
+            <div class="input-group">
+                <label>Interest rate</label>
+                <div class="percentage-input">
+                    <input type="text" id="interestRate" class="input-field" value="5">
+                    <span>%</span>
+                </div>
+            </div>
+
+            <button class="update-button" id="updateButton">Update</button>
+        </div>
+
+        <div class="results-wrapper">
+            <div class="tabs">
+                <div class="tab active">Payment breakdown</div>
+            </div>
+            
+            <div class="results-section">
+                <a href="#" class="advertiser-disclosure">Advertiser Disclosure</a>
+
+                <h2>Monthly payment breakdown</h2>
+                <p>Based on national average rates</p>
+
+                <div class="results-content">
+                    <div class="payment-circle">
+                        <canvas id="paymentChart"></canvas>
+                        <div class="monthly-amount">
+                            <div class="amount" id="monthlyPayment">$2,171</div>
+                            <div class="label">/mo</div>
+                        </div>
+                    </div>
+
+                    <div class="breakdown-items">
+                        <div class="breakdown-item">
+                            <div class="item-label">
+                                <span class="color-dot" style="background-color: #4A90E2;"></span>
+                                <span>Principal & interest</span>
+                            </div>
+                            <span class="amount-value" id="principalInterest">$1,825.19</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="item-label">
+                                <span class="color-dot" style="background-color: #7ED321;"></span>
+                                <span>Property tax</span>
+                            </div>
+                            <div class="amount-input">
+                                <span>$</span>
+                                <input type="text" value="280" readonly>
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="item-label">
+                                <span class="color-dot" style="background-color: #9013FE;"></span>
+                                <span>Homeowner's insurance</span>
+                            </div>
+                            <div class="amount-input">
+                                <span>$</span>
+                                <input type="text" value="66" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    class MortgageCalculator {
+        constructor() {
+            this.initializeElements();
+            this.attachEventListeners();
+            this.initializeChart();
+            // 初始计算
+            this.calculateMortgage();
+        }
+
+        initializeElements() {
+            // 输入元素
+            this.homePrice = document.getElementById('homePrice');
+            this.downPaymentAmount = document.getElementById('downPaymentAmount');
+            this.downPaymentPercent = document.getElementById('downPaymentPercent');
+            this.loanTerm = document.getElementById('loanTerm');
+            this.interestRate = document.getElementById('interestRate');
+            this.updateButton = document.getElementById('updateButton');
+
+            // 结果展示元素
+            this.monthlyPaymentDisplay = document.getElementById('monthlyPayment');
+            this.principalInterestDisplay = document.getElementById('principalInterest');
+            this.propertyTaxDisplay = document.getElementById('propertyTaxDisplay');
+            this.insuranceDisplay = document.getElementById('insuranceDisplay');
+        }
+
+        attachEventListeners() {
+            // 首付金额和百分比联动
+            this.homePrice.addEventListener('input', () => {
+                this.updateDownPaymentAmount();
+            });
+            
+            this.downPaymentAmount.addEventListener('input', () => {
+                this.updateDownPaymentPercent();
+            });
+            
+            this.downPaymentPercent.addEventListener('input', () => {
+                this.updateDownPaymentAmount();
+            });
+
+            // 更新按钮
+            this.updateButton.addEventListener('click', () => this.calculateMortgage());
+
+            // 格式化输入的金额
+            this.homePrice.addEventListener('blur', (e) => this.formatCurrency(e.target));
+            this.downPaymentAmount.addEventListener('blur', (e) => this.formatCurrency(e.target));
+        }
+
+        formatCurrency(element) {
+            let value = element.value.replace(/[^\d.]/g, '');
+            if (value) {
+                element.value = '$' + Number(value).toLocaleString('en-US');
+            }
+        }
+
+        parseCurrency(value) {
+            return parseFloat(value.replace(/[$,]/g, '') || 0);
+        }
+
+        updateDownPaymentPercent() {
+            const amount = this.parseCurrency(this.downPaymentAmount.value);
+            const price = this.parseCurrency(this.homePrice.value);
+            if (price) {
+                const percent = (amount / price) * 100;
+                this.downPaymentPercent.value = percent.toFixed(1);
+            }
+        }
+
+        updateDownPaymentAmount() {
+            const percent = parseFloat(this.downPaymentPercent.value || 0);
+            const price = this.parseCurrency(this.homePrice.value);
+            if (price && !isNaN(percent)) {
+                const amount = (price * percent) / 100;
+                this.downPaymentAmount.value = '$' + amount.toLocaleString('en-US');
+            }
+        }
+
+        calculateMortgage() {
+            const price = this.parseCurrency(this.homePrice.value);
+            const downPayment = this.parseCurrency(this.downPaymentAmount.value);
+            const loanAmount = price - downPayment;
+            const termYears = parseInt(this.loanTerm.value);
+            const annualRate = parseFloat(this.interestRate.value) / 100;
+            const monthlyRate = annualRate / 12;
+            const numberOfPayments = termYears * 12;
+
+            // 计算每月本金和利息
+            const monthlyPI = loanAmount * 
+                (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / 
+                (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+
+            // 使用固定值作为税费和保险
+            const monthlyTax = 280;  // 固定值
+            const monthlyInsurance = 66;  // 固定值
+
+            // 计算总月付款
+            const totalMonthly = monthlyPI + monthlyTax + monthlyInsurance;
+
+            // 更新显示
+            this.updateDisplay(totalMonthly, monthlyPI, monthlyTax, monthlyInsurance);
+            this.updateChart(monthlyPI, monthlyTax, monthlyInsurance);
+        }
+
+        initializeChart() {
+            const ctx = document.getElementById('paymentChart').getContext('2d');
+            this.chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Principal & Interest', 'Property Tax', 'Insurance'],
+                    datasets: [{
+                        data: [1825.19, 280, 66],
+                        backgroundColor: [
+                            '#4A90E2',
+                            '#7ED321',
+                            '#9013FE'
+                        ],
+                        borderWidth: 0,
+                        cutout: '75%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `$${context.raw.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        updateChart(principalAndInterest, propertyTax, insurance) {
+            if (this.chart) {
+                this.chart.data.datasets[0].data = [
+                    principalAndInterest,
+                    propertyTax,
+                    insurance
+                ];
+                this.chart.update();
+            }
+        }
+
+        updateDisplay(total, pi, tax, insurance) {
+            this.monthlyPaymentDisplay.textContent = `$${Math.round(total).toLocaleString()}`;
+            this.principalInterestDisplay.textContent = `$${pi.toFixed(2)}`;
+            this.propertyTaxDisplay.textContent = `$${tax.toFixed(2)}`;
+            this.insuranceDisplay.textContent = `$${insurance.toFixed(2)}`;
+        }
     }
 
-    function calculateLoan2() {
-      // 获取输入值
-      var loanAmount = parseFloat(document.getElementById("loanAmount").value) * 10000;
-      var interestRate = parseFloat(document.getElementById("interestRate").value);
-      var loanTerm = parseFloat(document.getElementById("loanTerm").value);
-
-      // 计算每月还款金额和每月应还本金
-      var monthlyInterestRate = interestRate / 100 / 12;
-      var totalMonths = loanTerm * 12;
-      var monthlyPrincipal = loanAmount / totalMonths;
-
-      var monthlyPayments = [];
-      var remainingPrincipal = loanAmount;
-
-      for (var i = 0; i < totalMonths; i++) {
-        var monthlyInterest = remainingPrincipal * monthlyInterestRate;
-        var monthlyPayment = monthlyInterest + monthlyPrincipal;
-
-        monthlyPayments.push(monthlyPayment.toFixed(2));
-        remainingPrincipal -= monthlyPrincipal;
-      }
-      document.getElementById("result2").classList.remove("hidden");
-
-      // 显示结果
-      document.getElementById("result2").innerHTML = "首月还款金额(等额本金)：" + monthlyPayments[0] + " 元";
-    }
-
-</script>
+    // 页面加载完成后初始化计算器
+    document.addEventListener('DOMContentLoaded', () => {
+        new MortgageCalculator();
+    });
+    </script>
 </body>
 </html>
