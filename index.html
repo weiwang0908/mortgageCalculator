@@ -165,15 +165,6 @@
             text-align: right;
         }
 
-        .advertiser-disclosure {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            color: #0066ff;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
         .results-section h2 {
             margin: 0;
             font-size: 24px;
@@ -259,8 +250,6 @@
             </div>
             
             <div class="results-section">
-                <a href="#" class="advertiser-disclosure">Advertiser Disclosure</a>
-
                 <h2>Monthly payment breakdown</h2>
                 <p>Based on national average rates</p>
 
@@ -310,6 +299,10 @@
     <script>
     class MortgageCalculator {
         constructor() {
+            // 添加税率和保险率常量
+            this.TAX_RATE = 0.7905; // 0.8%
+            this.INSURANCE_RATE = 0.1863; // 0.18%
+            
             this.initializeElements();
             this.attachEventListeners();
             this.initializeChart();
@@ -389,18 +382,19 @@
             const downPayment = this.parseCurrency(this.downPaymentAmount.value);
             const loanAmount = price - downPayment;
             const termYears = parseInt(this.loanTerm.value);
-            const annualRate = parseFloat(this.interestRate.value) / 100;
-            const monthlyRate = annualRate / 12;
+            const annualRate = parseFloat(this.interestRate.value);
+            const monthlyRate = annualRate / 12 / 100;
             const numberOfPayments = termYears * 12;
 
             // 计算每月本金和利息
-            const monthlyPI = loanAmount * 
-                (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / 
-                (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+            const monthlyPI = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / 
+                            (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
 
-            // 使用固定值作为税费和保险
-            const monthlyTax = 280;  // 固定值
-            const monthlyInsurance = 66;  // 固定值
+            // 使用税率计算每月税费
+            const monthlyTax = (price * this.TAX_RATE / 12 / 100);
+
+            // 使用保险率计算每月保险费
+            const monthlyInsurance = (price * this.INSURANCE_RATE / 12 / 100);
 
             // 计算总月付款
             const totalMonthly = monthlyPI + monthlyTax + monthlyInsurance;
@@ -412,12 +406,24 @@
 
         initializeChart() {
             const ctx = document.getElementById('paymentChart').getContext('2d');
+            // 计算初始值
+            const initialPrice = this.parseCurrency(this.homePrice.value);
+            const initialDownPayment = this.parseCurrency(this.downPaymentAmount.value);
+            const initialLoanAmount = initialPrice - initialDownPayment;
+            const initialMonthlyRate = 5 / 12 / 100; // 5% annual rate
+            const initialNumberOfPayments = 30 * 12; // 30 years
+
+            const initialPI = (initialLoanAmount * initialMonthlyRate * Math.pow(1 + initialMonthlyRate, initialNumberOfPayments)) / 
+                            (Math.pow(1 + initialMonthlyRate, initialNumberOfPayments) - 1);
+            const initialTax = (initialPrice * this.TAX_RATE / 12 / 100);
+            const initialInsurance = (initialPrice * this.INSURANCE_RATE / 12 / 100);
+
             this.chart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Principal & Interest', 'Property Tax', 'Insurance'],
                     datasets: [{
-                        data: [1825.19, 280, 66],
+                        data: [initialPI, initialTax, initialInsurance],
                         backgroundColor: [
                             '#4A90E2',
                             '#7ED321',
@@ -458,7 +464,8 @@
         }
 
         updateDisplay(total, pi, tax, insurance) {
-            this.monthlyPaymentDisplay.textContent = `$${Math.round(total).toLocaleString()}`;
+            const roundedTotal = Math.round(pi + tax + insurance);
+            this.monthlyPaymentDisplay.textContent = `$${roundedTotal.toLocaleString()}`;
             this.principalInterestDisplay.textContent = `$${pi.toFixed(2)}`;
             this.propertyTaxDisplay.textContent = `$${tax.toFixed(2)}`;
             this.insuranceDisplay.textContent = `$${insurance.toFixed(2)}`;
